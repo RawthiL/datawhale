@@ -6,8 +6,11 @@ opencv_python
 cvlib
 pixellib
 pandas
+xlrd # To read exel files with pandas
+openpyxl # To read exel files with pandas
 seaborn
 numpy
 matplotlib
 scikit-learn
+scikit-multilearn # For multy label 
 tqdm
