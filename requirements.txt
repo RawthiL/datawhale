@@ -1,16 +1,8 @@
-tensorflow_gpu==2.3.0
-tensorflow_hub==0.10.0
-jupyter==1.0.0
-keras-tuner
-opencv_python
 cvlib
 pixellib
-pandas
 xlrd # To read exel files with pandas
 openpyxl # To read exel files with pandas
 seaborn
-numpy
-matplotlib
-scikit-learn
 scikit-multilearn # For multy label 
 tqdm
+requests

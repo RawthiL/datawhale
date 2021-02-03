@@ -141,11 +141,18 @@ RUN apt-get install -y python3-gi-cairo
 
 
 
-ADD requirements.txt /home/datawhale/requirements.txt
+
+
 
 #Set the work directory to the datascience directory 
 WORKDIR /home/datawhale
 
+# Base stuff
+ADD requirements_base.txt /home/datawhale/requirements_base.txt
+RUN pip3 install -r requirements_base.txt  
+
+# Other stuff
+ADD requirements.txt /home/datawhale/requirements.txt
 RUN pip3 install -r requirements.txt  
 
 #Setting Jupyter notebook configurations 

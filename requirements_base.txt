@@ -1,0 +1,9 @@
+tensorflow_gpu==2.3.0
+tensorflow_hub==0.10.0
+jupyter==1.0.0
+keras-tuner
+numpy
+matplotlib
+scikit-learn
+opencv_python
+pandas
