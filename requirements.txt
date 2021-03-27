@@ -6,3 +6,7 @@ seaborn
 scikit-multilearn # For multy label 
 tqdm
 requests
+html5lib
+BeautifulSoup4
+pydot
+pyntcloud # Point cloud toolbox
