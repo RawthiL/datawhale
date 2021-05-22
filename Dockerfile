@@ -70,7 +70,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends --allow-unauthe
     libgtk2.0-dev  \
     pkg-config  \
     software-properties-common  \
-    unzip  
+    unzip  \
+    nano
 
 # Install TensorRT if not building for PowerPC
 #RUN [[ "${ARCH}" = "ppc64le" ]] || { apt-get update && \
@@ -133,7 +134,7 @@ RUN apt-get install -y gir1.2-gtk-3.0
 #RUN apt-get install -y vim bash-completion sudo
 RUN apt-get install -y python3-gi-cairo
 
-RUN echo "deb [ arch=amd64 ] https://downloads.skewed.de/apt focal main" > /etc/apt/sources.list
+RUN echo "deb [ arch=amd64 ] https://downloads.skewed.de/apt focal main" >> /etc/apt/sources.list
 RUN apt-key adv --keyserver keys.openpgp.org --recv-key 612DEFB798507F25
 RUN add-apt-repository "deb [ arch=amd64 ] https://downloads.skewed.de/apt focal main"
 RUN apt-get update
@@ -141,9 +142,9 @@ RUN apt-get install python3-graph-tool -y
 
 
 
+# Install tesseract-ocr
 
-
-
+RUN apt-get install -y tesseract-ocr
 
 
 
@@ -165,6 +166,8 @@ RUN pip3 install -r requirements_base.txt
 ADD requirements.txt /home/datawhale/requirements.txt
 RUN pip3 install -r requirements.txt  
 
+
+
 #Setting Jupyter notebook configurations 
 RUN jupyter notebook --generate-config --allow-root
 # Make connection easy
@@ -177,12 +180,10 @@ RUN echo "c.NotebookApp.disable_check_xsrf = True" >> /home/datawhale/.jupyter/j
 
 
 
-  
-
 # RUN echo "export XDG_RUNTIME_DIR=''" >> ~/.bashrc
 RUN chown -R datawhale:datawhale /home/datawhale
 
-
+RUN apt-get install -y nvidia-modprobe
 
 #Run the command to start the Jupyter server
 CMD ["jupyter", "notebook", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root"]

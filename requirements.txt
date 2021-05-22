@@ -10,3 +10,5 @@ html5lib
 BeautifulSoup4
 pydot
 pyntcloud # Point cloud toolbox
+keras-ocr # simple OCR, always usefull
+pytesseract
