@@ -1,52 +1,12 @@
-ARG UBUNTU_VERSION=20.04
-ARG CUDA=11.0.3
-
-FROM nvidia/cuda:${CUDA}-base-ubuntu${UBUNTU_VERSION}
-ARG CUDA
-
-ENV CUDNN=8.0.4.30-1
-ARG CUDNN_MAJOR_VERSION=8
-ARG LIB_DIR_PREFIX=x86_64
-ARG LIBNVINFER=7.1.3-1
-ARG LIBNVINFER_MAJOR_VERSION=7
-
-ENV HOME /home/datawhale
-ENV PYTHON_VERSION 3.7.4
-ENV LANG C.UTF-8
-ENV DEBIAN_FRONTEND=noninteractive
+FROM nvidia/cuda:11.0.3-cudnn8-devel-ubuntu20.04
 
 
-SHELL ["/bin/bash", "-c"]
-
-RUN useradd -ms /bin/bash datawhale
-RUN su datawhale
-
-RUN apt-get update   \
-    && apt-get upgrade -y   \
-    && apt-get install -y --no-install-recommends apt-utils  
-
-RUN apt-get install -y wget software-properties-common
-RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-ubuntu2004.pin
-RUN mv cuda-ubuntu2004.pin /etc/apt/preferences.d/cuda-repository-pin-600
-RUN apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/7fa2af80.pub
-RUN add-apt-repository "deb http://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/ /"
-RUN apt-get update 
+ENV TZ=America/Argentina
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 RUN apt-get update && apt-get install -y --no-install-recommends --allow-unauthenticated  \
     build-essential  \
     ca-certificates  \
-    cuda-11-0 \
-    libcudnn8  \
-    # TensorFlow doesn't require libnccl anymore but Open MPI still depends on it
-    libnccl2  \
-    libgomp1  \
-    libnccl-dev  \
-    libfreetype6-dev  \
-    libhdf5-serial-dev  \
-    liblzma-dev  \
-    libpng-dev  \
-    libtemplate-perl  \
-    libzmq3-dev  \
     curl  \
     git  \
     emacs  \
@@ -73,26 +33,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends --allow-unauthe
     unzip  \
     nano
 
-# Install TensorRT if not building for PowerPC
-#RUN [[ "${ARCH}" = "ppc64le" ]] || { apt-get update && \
-#    apt-get install -y --no-install-recommends libnvinfer${LIBNVINFER_MAJOR_VERSION}=${LIBNVINFER}+cuda${CUDA} \
-#    libnvinfer-plugin${LIBNVINFER_MAJOR_VERSION}=${LIBNVINFER}+cuda${CUDA} \
-#    && apt-get clean \
-#    && rm -rf /var/lib/apt/lists/*; }
-RUN [[ "${ARCH}" = "ppc64le" ]] ||  { \
-    wget https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu2004/x86_64/nvidia-machine-learning-repo-ubuntu2004_1.0.0-1_amd64.deb && \
-    apt install ./nvidia-machine-learning-repo-ubuntu2004_1.0.0-1_amd64.deb && \
-    apt-get update ; }
-
-# For CUDA profiling, TensorFlow requires CUPTI.
-ENV LD_LIBRARY_PATH /usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/lib64:$LD_LIBRARY_PATH
-ENV LD_INCLUDE_PATH=/usr/local/cuda/include:/usr/local/cuda/extras/CUPTI/include:$LD_INCLUDE_PATH
-
-# Link the libcuda stub to the location where tensorflow is searching for it and reconfigure
-# dynamic linker run-time bindings
-RUN ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/libcuda.so.1 \
-    && echo "/usr/local/cuda/lib64/stubs" > /etc/ld.so.conf.d/z-cuda-stubs.conf \
-    && ldconfig
 
 # More OpenCV stuff -- LibGL
 # RUN apt-get install ffmpeg libsm6 libxext6  -y
@@ -104,6 +44,11 @@ RUN apt-get update \
 RUN apt-get update  \
   && apt-get install -y python3-pip python3-dev \
   && ln -s /usr/bin/python3 /usr/local/bin/python 
+
+
+
+RUN useradd -ms /bin/bash datawhale
+RUN su datawhale
 
 RUN chown -R datawhale:datawhale /home/datawhale
 RUN pip3 install --upgrade pip
@@ -169,6 +114,8 @@ RUN pip3 install -r requirements.txt
 
 
 #Setting Jupyter notebook configurations 
+RUN su datawhale
+RUN mkdir /home/datawhale/.jupyter/
 RUN jupyter notebook --generate-config --allow-root
 # Make connection easy
 #RUN mkdir /home/datawhale/.jupyter/
@@ -183,7 +130,6 @@ RUN echo "c.NotebookApp.disable_check_xsrf = True" >> /home/datawhale/.jupyter/j
 # RUN echo "export XDG_RUNTIME_DIR=''" >> ~/.bashrc
 RUN chown -R datawhale:datawhale /home/datawhale
 
-RUN apt-get install -y nvidia-modprobe
 
 #Run the command to start the Jupyter server
 CMD ["jupyter", "notebook", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root"]
