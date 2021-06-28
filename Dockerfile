@@ -1,4 +1,4 @@
-FROM nvidia/cuda:11.0.3-cudnn8-devel-ubuntu20.04
+FROM nvidia/cuda:11.2.2-cudnn8-runtime-ubuntu20.04
 
 
 ENV TZ=America/Argentina
@@ -79,29 +79,24 @@ RUN apt-get install -y gir1.2-gtk-3.0
 #RUN apt-get install -y vim bash-completion sudo
 RUN apt-get install -y python3-gi-cairo
 
+
 RUN echo "deb [ arch=amd64 ] https://downloads.skewed.de/apt focal main" >> /etc/apt/sources.list
 RUN apt-key adv --keyserver keys.openpgp.org --recv-key 612DEFB798507F25
 RUN add-apt-repository "deb [ arch=amd64 ] https://downloads.skewed.de/apt focal main"
-RUN apt-get update
-RUN apt-get install python3-graph-tool -y
+RUN apt update
+RUN apt install python3-graph-tool -y
 
 
 
 # Install tesseract-ocr
-
 RUN apt-get install -y tesseract-ocr
-
-
-
-
-
-
-
-
-
+# Get latest tessetact OCR for english and spanish
+RUN wget -N -P /usr/share/tesseract-ocr/4.00/tessdata/ https://github.com/tesseract-ocr/tessdata/raw/master/eng.traineddata
+RUN wget -N -P /usr/share/tesseract-ocr/4.00/tessdata/ https://github.com/tesseract-ocr/tessdata/raw/master/spa.traineddata
 
 #Set the work directory to the datascience directory 
 WORKDIR /home/datawhale
+
 
 # Base stuff
 ADD requirements_base.txt /home/datawhale/requirements_base.txt
@@ -114,7 +109,6 @@ RUN pip3 install -r requirements.txt
 
 
 #Setting Jupyter notebook configurations 
-RUN su datawhale
 RUN mkdir /home/datawhale/.jupyter/
 RUN jupyter notebook --generate-config --allow-root
 # Make connection easy
@@ -129,6 +123,12 @@ RUN echo "c.NotebookApp.disable_check_xsrf = True" >> /home/datawhale/.jupyter/j
 
 # RUN echo "export XDG_RUNTIME_DIR=''" >> ~/.bashrc
 RUN chown -R datawhale:datawhale /home/datawhale
+
+
+# Get nltk data
+USER datawhale
+RUN python3 -c "exec(\"import nltk\nnltk.download('stopwords')\nnltk.download('wordnet')\nnltk.download('averaged_perceptron_tagger')\")"
+
 
 
 #Run the command to start the Jupyter server
