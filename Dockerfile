@@ -1,4 +1,4 @@
-FROM nvidia/cuda:11.2.2-cudnn8-runtime-ubuntu20.04
+FROM nvidia/cuda:11.2.2-cudnn8-devel-ubuntu20.04
 
 
 ENV TZ=America/Argentina
@@ -94,18 +94,50 @@ RUN apt-get install -y tesseract-ocr
 RUN wget -N -P /usr/share/tesseract-ocr/4.00/tessdata/ https://github.com/tesseract-ocr/tessdata/raw/master/eng.traineddata
 RUN wget -N -P /usr/share/tesseract-ocr/4.00/tessdata/ https://github.com/tesseract-ocr/tessdata/raw/master/spa.traineddata
 
-#Set the work directory to the datascience directory 
+
+# Airflow
+RUN export SLUGIFY_USES_TEXT_UNIDECODE=yes
+RUN apt-get install -y \
+    build-essential libssl-dev libffi-dev \
+    libxml2-dev libxslt1-dev zlib1g-dev \
+    python3-pip git software-properties-common
+
+
+RUN echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf 
+RUN echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf
+# RUN apt-get install -y libcupti-dev
+
+
+
+# Set the work directory to the datascience directory 
 WORKDIR /home/datawhale
+# Set user
+USER datawhale
+
+ADD requirements_pipelines.txt /home/datawhale/requirements_pipelines.txt
+RUN pip3 install -r requirements_pipelines.txt  
 
 
 # Base stuff
-ADD requirements_base.txt /home/datawhale/requirements_base.txt
-RUN pip3 install -r requirements_base.txt  
+# ADD requirements_base.txt /home/datawhale/requirements_base.txt
+# RUN pip3 install -r requirements_base.txt  
 
 # Other stuff
-ADD requirements.txt /home/datawhale/requirements.txt
-RUN pip3 install -r requirements.txt  
+# ADD requirements.txt /home/datawhale/requirements.txt
+# RUN pip3 install -r requirements.txt  
 
+# Get nltk data
+RUN python3 -c "exec(\"import nltk\nnltk.download('stopwords')\nnltk.download('wordnet')\nnltk.download('averaged_perceptron_tagger')\")"
+
+# Airflow and MLOps stuff
+# ADD requirements_pipelines.txt /home/datawhale/requirements_pipelines.txt
+# RUN pip3 install -r requirements_pipelines.txt  
+
+RUN mkdir /home/datawhale/airflow/
+
+
+
+ENV PATH /home/datawhale/.local/bin:$PATH
 
 
 #Setting Jupyter notebook configurations 
@@ -120,16 +152,15 @@ RUN echo "c.NotebookApp.allow_origin = '*' #allow all origins" >> /home/datawhal
 RUN echo "c.NotebookApp.disable_check_xsrf = True" >> /home/datawhale/.jupyter/jupyter_notebook_config.py
 
 
+RUN pip3 install keras-tuner==1.0.0
 
-# RUN echo "export XDG_RUNTIME_DIR=''" >> ~/.bashrc
-RUN chown -R datawhale:datawhale /home/datawhale
-
-
-# Get nltk data
-USER datawhale
-RUN python3 -c "exec(\"import nltk\nnltk.download('stopwords')\nnltk.download('wordnet')\nnltk.download('averaged_perceptron_tagger')\")"
-
+EXPOSE 5432
 
 
 #Run the command to start the Jupyter server
 CMD ["jupyter", "notebook", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root"]
+
+
+# docker-compose up initdb
+## chmod -R 775 postgresql
+# docker-compose up
