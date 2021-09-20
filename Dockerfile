@@ -35,8 +35,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends --allow-unauthe
 
 
 # More OpenCV stuff -- LibGL
-# RUN apt-get install ffmpeg libsm6 libxext6  -y
-# RUN apt-get install libgl1-mesa-glx
 RUN apt-get update \
     && apt-get install -y libgl-dev
 
@@ -46,22 +44,18 @@ RUN apt-get update  \
   && ln -s /usr/bin/python3 /usr/local/bin/python 
 
 
-
+# Create user
 RUN useradd -ms /bin/bash datawhale
-RUN su datawhale
-
 RUN chown -R datawhale:datawhale /home/datawhale
-RUN pip3 install --upgrade pip
 
+# Install pip
+RUN pip3 install --upgrade pip
 
 # Graphviz for Keras model plot
 RUN apt-get install -y graphviz python3-pygraphviz
 
-
 # Install graphtool
-
 RUN apt-get install -y apt-utils wget bzip2
-
 RUN apt-get install -y gcc g++
 RUN apt-get install -y libboost-all-dev
 RUN apt-get install -y libexpat1-dev
@@ -76,9 +70,7 @@ RUN apt-get install -y graphviz python3-pygraphviz
 RUN apt-get install -y python3-pip
 
 RUN apt-get install -y gir1.2-gtk-3.0
-#RUN apt-get install -y vim bash-completion sudo
 RUN apt-get install -y python3-gi-cairo
-
 
 RUN echo "deb [ arch=amd64 ] https://downloads.skewed.de/apt focal main" >> /etc/apt/sources.list
 RUN apt-key adv --keyserver keys.openpgp.org --recv-key 612DEFB798507F25
@@ -86,14 +78,11 @@ RUN add-apt-repository "deb [ arch=amd64 ] https://downloads.skewed.de/apt focal
 RUN apt update
 RUN apt install python3-graph-tool -y
 
-
-
 # Install tesseract-ocr
 RUN apt-get install -y tesseract-ocr
 # Get latest tessetact OCR for english and spanish
 RUN wget -N -P /usr/share/tesseract-ocr/4.00/tessdata/ https://github.com/tesseract-ocr/tessdata/raw/master/eng.traineddata
 RUN wget -N -P /usr/share/tesseract-ocr/4.00/tessdata/ https://github.com/tesseract-ocr/tessdata/raw/master/spa.traineddata
-
 
 # Airflow
 RUN export SLUGIFY_USES_TEXT_UNIDECODE=yes
@@ -103,10 +92,8 @@ RUN apt-get install -y \
     python3-pip git software-properties-common
 
 
-RUN echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf 
-RUN echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf
-# RUN apt-get install -y libcupti-dev
-
+# RUN echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf 
+# RUN echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf
 
 
 # Set the work directory to the datascience directory 
@@ -114,29 +101,26 @@ WORKDIR /home/datawhale
 # Set user
 USER datawhale
 
-ADD requirements_pipelines.txt /home/datawhale/requirements_pipelines.txt
-RUN pip3 install -r requirements_pipelines.txt  
-
 
 # Base stuff
-# ADD requirements_base.txt /home/datawhale/requirements_base.txt
-# RUN pip3 install -r requirements_base.txt  
+ADD requirements_base.txt /home/datawhale/requirements_base.txt
+RUN pip3 install -r requirements_base.txt  
 
 # Other stuff
-# ADD requirements.txt /home/datawhale/requirements.txt
-# RUN pip3 install -r requirements.txt  
+ADD requirements.txt /home/datawhale/requirements.txt
+RUN pip3 install -r requirements.txt  
+
+# Pipeline stuff
+ADD requirements_pipelines.txt /home/datawhale/requirements_pipelines.txt
+RUN pip3 install -r requirements_pipelines.txt  
 
 # Get nltk data
 RUN python3 -c "exec(\"import nltk\nnltk.download('stopwords')\nnltk.download('wordnet')\nnltk.download('averaged_perceptron_tagger')\")"
 
-# Airflow and MLOps stuff
-# ADD requirements_pipelines.txt /home/datawhale/requirements_pipelines.txt
-# RUN pip3 install -r requirements_pipelines.txt  
-
+# Create airflow dir
 RUN mkdir /home/datawhale/airflow/
 
-
-
+# Add local bin to path
 ENV PATH /home/datawhale/.local/bin:$PATH
 
 
@@ -144,23 +128,13 @@ ENV PATH /home/datawhale/.local/bin:$PATH
 RUN mkdir /home/datawhale/.jupyter/
 RUN jupyter notebook --generate-config --allow-root
 # Make connection easy
-#RUN mkdir /home/datawhale/.jupyter/
 RUN echo "c.NotebookApp.token = ''" > /home/datawhale/.jupyter/jupyter_notebook_config.py
 RUN echo "c.NotebookApp.password = ''" >> /home/datawhale/.jupyter/jupyter_notebook_config.py
 # Make it (more) insecure to be able to use the plot function of pyntcloud in jupyther...
 RUN echo "c.NotebookApp.allow_origin = '*' #allow all origins" >> /home/datawhale/.jupyter/jupyter_notebook_config.py
 RUN echo "c.NotebookApp.disable_check_xsrf = True" >> /home/datawhale/.jupyter/jupyter_notebook_config.py
 
-
-RUN pip3 install keras-tuner==1.0.0
-
-EXPOSE 5432
-
+RUN jupyter nbextension enable --py widgetsnbextension
 
 #Run the command to start the Jupyter server
 CMD ["jupyter", "notebook", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root"]
-
-
-# docker-compose up initdb
-## chmod -R 775 postgresql
-# docker-compose up

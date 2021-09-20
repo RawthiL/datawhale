@@ -1,18 +1,18 @@
-cvlib
-pixellib
-xlrd # To read exel files with pandas
-openpyxl # To read exel files with pandas
-seaborn
-scikit-multilearn # For multy label 
-tqdm
-requests
-html5lib
-BeautifulSoup4
-pydot
-pyntcloud # Point cloud toolbox
-keras-ocr # simple OCR, always usefull
-pytesseract # better OCR
-tensorflow_probability
-imgaug # Image augmentation
-nltk # NLP tools
-textblob # NLP tools
+cvlib==0.2.6
+pixellib==0.6.6
+xlrd==2.0.1 # To read exel files with pandas
+openpyxl==3.0.7 # To read exel files with pandas
+seaborn==0.11.1
+scikit-multilearn==0.2.0 # For multy label 
+tqdm==4.61.1
+requests==2.25.1
+html5lib==1.1
+beautifulsoup4==4.9.3
+pydot==1.4.2
+pyntcloud==0.1.4 # Point cloud toolbox
+keras-ocr==0.8.7 # simple OCR, always usefull
+pytesseract==0.3.8 # better OCR
+tensorflow-probability==0.13.0
+imgaug==0.4.0 # Image augmentation
+nltk==3.6.2 # NLP tools
+textblob==0.15.3 # NLP tools
