@@ -12,48 +12,31 @@ services:
     expose: 
       - 5432   
     volumes:
-        - /home/rawthil/Documents/Work/Okkralabs/MedNotes_classification/Code/untracked/postgresql:/var/lib/postgresql/data:rw
+        - ../../untracked/pipeline_logs/postgresql:/var/lib/postgresql/data:rw
+    user: "${UID}:${GID}"  # This requires the enviroment variables (at host): export UID=$(id -u) and export GID=$(id -g)
 
   initdb:
-    image: datawhale:tf-2.5
+    build: .
     entrypoint: airflow db init
     depends_on:
         - postgres
     volumes:
-      - /home/rawthil/Documents/Work/Okkralabs/MedNotes_classification/Code/classifier/ml_pipeline/dags:/home/datawhale/airflow/dags:rw
-      - /home/rawthil/Documents/Work/Okkralabs/MedNotes_classification/Code/untracked/airflow_logs:/home/datawhale/airflow/logs:rw
-    environment:
-      AIRFLOW__CORE__EXECUTOR: CeleryExecutor
-      AIRFLOW__CORE__PARALLELISM: 1
-      AIRFLOW__CORE__DAG_CONCURRENCY: 1
-      AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:airflow@postgres/airflow
-      AIRFLOW__CELERY__BROKER_URL: redis://:@redis:6379/0
-      AIRFLOW__CELERY__WORKER_CONCURRENCY: 1
-      AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
-      AIRFLOW__CORE__FERNET_KEY: ''
-      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
-      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+      - ../../untracked/pipeline_logs/airflow_logs:/home/datawhale/airflow/logs:rw
+    env_file:
+      - airflow.env
 
   create_user:
-    image: datawhale:tf-2.5
+    build: .
     entrypoint: airflow users create -r Admin -u airflow -f datawhale -l datawhale -p airflow -e datawhale@rawthil.com.ar
     depends_on:
         - postgres
         - initdb
-    environment:
-      AIRFLOW__CORE__EXECUTOR: CeleryExecutor
-      AIRFLOW__CORE__PARALLELISM: 1
-      AIRFLOW__CORE__DAG_CONCURRENCY: 1
-      AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:airflow@postgres/airflow
-      AIRFLOW__CELERY__BROKER_URL: redis://:@redis:6379/0
-      AIRFLOW__CELERY__WORKER_CONCURRENCY: 1
-      AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
-      AIRFLOW__CORE__FERNET_KEY: ''
-      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
-      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    env_file:
+      - airflow.env
+
 
   webserver:
-    image: datawhale:tf-2.5
+    build: .
     restart: always
     entrypoint: airflow webserver
     healthcheck:
@@ -66,26 +49,13 @@ services:
     depends_on:
         - postgres
     volumes:
-        - /home/rawthil/Documents/Work/Okkralabs/MedNotes_classification/Code/classifier/ml_pipeline/dags:/home/datawhale/airflow/dags:rw
-        - /home/rawthil/Documents/Work/Okkralabs/MedNotes_classification/Code/untracked/airflow_logs:/home/datawhale/airflow/logs:rw
-        - /home/rawthil/Documents/Work/Okkralabs/MedNotes_classification/Code/classifier/ml_pipeline:/home/datawhale/code:rw
-        - /home/rawthil/Documents/Work/Okkralabs/MedNotes_classification/Code/classifier/libs:/home/datawhale/code/libs:rw
-        - /home/rawthil/Documents/Work/Okkralabs/MedNotes_classification/Code/untracked/Datasets:/home/datawhale/datasets:rw
-    environment:
-      AIRFLOW__CORE__EXECUTOR: CeleryExecutor
-      AIRFLOW__CORE__PARALLELISM: 1
-      AIRFLOW__CORE__DAG_CONCURRENCY: 1
-      AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:airflow@postgres/airflow
-      AIRFLOW__CELERY__BROKER_URL: redis://:@redis:6379/0
-      AIRFLOW__CELERY__WORKER_CONCURRENCY: 1
-      AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
-      AIRFLOW__CORE__FERNET_KEY: ''
-      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
-      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+        - ../../untracked/pipeline_logs/airflow_logs:/home/datawhale/airflow/logs:rw
+    env_file:
+      - airflow.env
         
 
   scheduler:
-    image: datawhale:tf-2.5
+    build: .
     restart: always
     entrypoint: airflow scheduler
     healthcheck:
@@ -96,27 +66,14 @@ services:
     depends_on:
         - postgres
     volumes:
-        - /home/rawthil/Documents/Work/Okkralabs/MedNotes_classification/Code/classifier/ml_pipeline/dags:/home/datawhale/airflow/dags:rw
-        - /home/rawthil/Documents/Work/Okkralabs/MedNotes_classification/Code/untracked/airflow_logs:/home/datawhale/airflow/logs:rw
-        - /home/rawthil/Documents/Work/Okkralabs/MedNotes_classification/Code/classifier/ml_pipeline:/home/datawhale/code:rw
-        - /home/rawthil/Documents/Work/Okkralabs/MedNotes_classification/Code/classifier/libs:/home/datawhale/code/libs:rw
-        - /home/rawthil/Documents/Work/Okkralabs/MedNotes_classification/Code/untracked/Datasets:/home/datawhale/datasets:rw
-    environment:
-      AIRFLOW__CORE__EXECUTOR: CeleryExecutor
-      AIRFLOW__CORE__PARALLELISM: 1
-      AIRFLOW__CORE__DAG_CONCURRENCY: 1
-      AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:airflow@postgres/airflow
-      AIRFLOW__CELERY__BROKER_URL: redis://:@redis:6379/0
-      AIRFLOW__CELERY__WORKER_CONCURRENCY: 1
-      AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
-      AIRFLOW__CORE__FERNET_KEY: ''
-      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
-      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+        - ../../untracked/pipeline_logs/airflow_logs:/home/datawhale/airflow/logs:rw
+    env_file:
+      - airflow.env
 
   redis:
     image: redis:latest
-    ports:
-      - 6379:6379
+    expose:
+      - 6379
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -124,37 +81,21 @@ services:
       retries: 50
     restart: always
     volumes:
-      - /home/rawthil/Documents/Work/Okkralabs/MedNotes_classification/Code/classifier/ml_pipeline/dags:/home/datawhale/airflow/dags:rw
-      - /home/rawthil/Documents/Work/Okkralabs/MedNotes_classification/Code/untracked/airflow_logs:/home/datawhale/airflow/logs:rw
-      - /home/rawthil/Documents/Work/Okkralabs/MedNotes_classification/Code/classifier/ml_pipeline:/home/datawhale/code:rw
-      - /home/rawthil/Documents/Work/Okkralabs/MedNotes_classification/Code/classifier/libs:/home/datawhale/code/libs:rw
-      - /home/rawthil/Documents/Work/Okkralabs/MedNotes_classification/Code/untracked/Datasets:/home/datawhale/datasets:rw
+      - ../../untracked/pipeline_logs/airflow_logs:/home/datawhale/airflow/logs:rw
 
   worker:
-    image: datawhale:tf-2.5
+    build: .
     command: airflow celery worker
     restart: always
-    environment:
-      COMMIT_HASH: debug_run_not_tracked
-      COMMIT_CLEAN: 'False'
-      AIRFLOW__CORE__EXECUTOR: CeleryExecutor
-      AIRFLOW__CORE__PARALLELISM: 4
-      AIRFLOW__CORE__DAG_CONCURRENCY: 4
-      AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:airflow@postgres/airflow
-      AIRFLOW__CELERY__BROKER_URL: redis://:@redis:6379/0
-      AIRFLOW__CELERY__WORKER_CONCURRENCY: 4
-      AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
-      AIRFLOW__CORE__FERNET_KEY: ''
-      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
-      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    env_file:
+      - airflow.env
     depends_on:
       - redis
     volumes:
-      - /home/rawthil/Documents/Work/Okkralabs/MedNotes_classification/Code/classifier/ml_pipeline/dags:/home/datawhale/airflow/dags:rw
-      - /home/rawthil/Documents/Work/Okkralabs/MedNotes_classification/Code/untracked/airflow_logs:/home/datawhale/airflow/logs:rw
-      - /home/rawthil/Documents/Work/Okkralabs/MedNotes_classification/Code/classifier/ml_pipeline:/home/datawhale/code:rw
-      - /home/rawthil/Documents/Work/Okkralabs/MedNotes_classification/Code/classifier/libs:/home/datawhale/code/libs:rw
-      - /home/rawthil/Documents/Work/Okkralabs/MedNotes_classification/Code/untracked/Datasets:/home/datawhale/datasets:rw
+      - ../../untracked/pipeline_logs/airflow_logs:/home/datawhale/airflow/logs:rw
+      - ../../untracked/Datasets:/home/datawhale/datasets:rw
+      - ../../untracked/pipeline_data:/home/datawhale/pipeline_data:rw
+      - ../../untracked/tf_serving_models:/home/datawhale/output:rw
     deploy:
       resources:
         reservations:
@@ -162,3 +103,4 @@ services:
             - driver: nvidia
               device_ids: ['0']
               capabilities: [gpu, compute, utility]
+
