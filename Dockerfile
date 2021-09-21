@@ -81,8 +81,8 @@ RUN apt install python3-graph-tool -y
 # Install tesseract-ocr
 RUN apt-get install -y tesseract-ocr
 # Get latest tessetact OCR for english and spanish
-RUN wget -N -P /usr/share/tesseract-ocr/4.00/tessdata/ https://github.com/tesseract-ocr/tessdata/raw/master/eng.traineddata
-RUN wget -N -P /usr/share/tesseract-ocr/4.00/tessdata/ https://github.com/tesseract-ocr/tessdata/raw/master/spa.traineddata
+RUN wget -N -P /usr/share/tesseract-ocr/4.00/tessdata/ https://github.com/tesseract-ocr/tessdata/blob/main/eng.traineddata?raw=true
+RUN wget -N -P /usr/share/tesseract-ocr/4.00/tessdata/ https://github.com/tesseract-ocr/tessdata/blob/main/spa.traineddata?raw=true
 
 # Airflow
 RUN export SLUGIFY_USES_TEXT_UNIDECODE=yes
