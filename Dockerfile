@@ -81,8 +81,11 @@ RUN apt install python3-graph-tool -y
 # Install tesseract-ocr
 RUN apt-get install -y tesseract-ocr
 # Get latest tessetact OCR for english and spanish
-RUN wget -N -P /usr/share/tesseract-ocr/4.00/tessdata/ https://github.com/tesseract-ocr/tessdata/blob/main/eng.traineddata?raw=true
-RUN wget -N -P /usr/share/tesseract-ocr/4.00/tessdata/ https://github.com/tesseract-ocr/tessdata/blob/main/spa.traineddata?raw=true
+RUN wget -N https://github.com/tesseract-ocr/tessdata/blob/main/eng.traineddata?raw=true -O /usr/share/tesseract-ocr/4.00/tessdata/eng.traineddata
+RUN wget -N https://github.com/tesseract-ocr/tessdata/blob/main/spa.traineddata?raw=true -O /usr/share/tesseract-ocr/4.00/tessdata/esp.traineddata
+
+# PDF support
+RUN apt-get install -y libpoppler-dev
 
 # Airflow
 RUN export SLUGIFY_USES_TEXT_UNIDECODE=yes
@@ -135,6 +138,11 @@ RUN echo "c.NotebookApp.allow_origin = '*' #allow all origins" >> /home/datawhal
 RUN echo "c.NotebookApp.disable_check_xsrf = True" >> /home/datawhale/.jupyter/jupyter_notebook_config.py
 
 RUN jupyter nbextension enable --py widgetsnbextension
+
+USER root
+RUN apt-get install -y libpoppler-cpp-dev cmake
+RUN apt-get install -y poppler-utils
+USER datawhale
 
 #Run the command to start the Jupyter server
 CMD ["jupyter", "notebook", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root"]

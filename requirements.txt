@@ -16,3 +16,4 @@ tensorflow-probability==0.13.0
 imgaug==0.4.0 # Image augmentation
 nltk==3.6.2 # NLP tools
 textblob==0.15.3 # NLP tools
+pdf2image
