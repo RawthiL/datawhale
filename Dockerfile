@@ -78,11 +78,15 @@ RUN add-apt-repository "deb [ arch=amd64 ] https://downloads.skewed.de/apt focal
 RUN apt update
 RUN apt install python3-graph-tool -y
 
-# Install tesseract-ocr
+# Install tesseract-ocr 5.0
+RUN add-apt-repository "ppa:alex-p/tesseract-ocr-devel"
+RUN apt-get update 
+
 RUN apt-get install -y tesseract-ocr
-# Get latest tessetact OCR for english and spanish
-RUN wget -N https://github.com/tesseract-ocr/tessdata/blob/main/eng.traineddata?raw=true -O /usr/share/tesseract-ocr/4.00/tessdata/eng.traineddata
-RUN wget -N https://github.com/tesseract-ocr/tessdata/blob/main/spa.traineddata?raw=true -O /usr/share/tesseract-ocr/4.00/tessdata/esp.traineddata
+
+# Get latest BEST tessetact models for english and spanish
+RUN wget -N https://github.com/tesseract-ocr/tessdata_best/blob/main/eng.traineddata?raw=true -O /usr/share/tesseract-ocr/5/tessdata/eng.traineddata
+RUN wget -N https://github.com/tesseract-ocr/tessdata_best/blob/main/spa.traineddata?raw=true -O /usr/share/tesseract-ocr/5/tessdata/esp.traineddata
 
 # PDF support
 RUN apt-get install -y libpoppler-dev
@@ -92,7 +96,7 @@ RUN export SLUGIFY_USES_TEXT_UNIDECODE=yes
 RUN apt-get install -y \
     build-essential libssl-dev libffi-dev \
     libxml2-dev libxslt1-dev zlib1g-dev \
-    python3-pip git software-properties-common
+    python3-pip git 
 
 
 # RUN echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf 

@@ -17,3 +17,4 @@ imgaug==0.4.0 # Image augmentation
 nltk==3.6.2 # NLP tools
 textblob==0.15.3 # NLP tools
 pdf2image
+textdistance==4.2.1 # Lots of text distance metrics
