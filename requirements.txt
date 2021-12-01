@@ -1,6 +1,6 @@
 cvlib==0.2.6
 pixellib==0.6.6
-xlrd==2.0.1 # To read exel files with pandas
+xlrd==2.0.1 # To read excel files with pandas
 openpyxl==3.0.7 # To read exel files with pandas
 seaborn==0.11.1
 scikit-multilearn==0.2.0 # For multy label 
@@ -18,3 +18,6 @@ nltk==3.6.2 # NLP tools
 textblob==0.15.3 # NLP tools
 pdf2image
 textdistance==4.2.1 # Lots of text distance metrics
+tensorflow-text==2.5.0 # tensorflow nlp
+tf-models-official==2.5.0 # official tensorflow models repo
+
