@@ -146,6 +146,8 @@ RUN jupyter nbextension enable --py widgetsnbextension
 USER root
 RUN apt-get install -y libpoppler-cpp-dev cmake
 RUN apt-get install -y poppler-utils
+RUN apt-get install -y default-jdk
+RUN echo 'root:dataroot' | chpasswd
 USER datawhale
 
 #Run the command to start the Jupyter server
