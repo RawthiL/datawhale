@@ -20,4 +20,5 @@ pdf2image
 textdistance==4.2.1 # Lots of text distance metrics
 tensorflow-text==2.5.0 # tensorflow nlp
 tf-models-official==2.5.0 # official tensorflow models repo
-
+tabula-py==2.3.0
+PyPDF2==1.26.0
